@@ -13,6 +13,6 @@
 // (dados de mentirinha, nenhum e-mail enviado).
 
 window.AMIGO_SECRETO_CONFIG = {
-  supabaseUrl: "https://SEU-PROJETO.supabase.co",
-  supabaseKey: "sb_publishable_COLE_AQUI",
+  supabaseUrl: "https://dscghbaxyhlhtfblcgxe.supabase.co",
+  supabaseKey: "sb_publishable_XmucYaLSP6OuTWqM84RuyQ_sReNhXi9",
 };
