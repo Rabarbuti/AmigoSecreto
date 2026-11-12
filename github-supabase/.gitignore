@@ -1,0 +1,19 @@
+node_modules/
+*.log
+.DS_Store
+
+# Segredos: nenhum arquivo .env (de qualquer pasta) vai para o GitHub. Só o exemplo.
+.env
+.env.*
+!.env.example
+supabase/.env*
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+
+# Configuração local do site (aponta para o Supabase do seu computador)
+docs/config.local.js
+
+# Ferramentas do editor
+.claude/

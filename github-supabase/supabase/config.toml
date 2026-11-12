@@ -1,0 +1,70 @@
+#:schema https://supabase.com/schemas/config/v1.json
+#
+# Configuração do Supabase LOCAL (só para desenvolver e testar no seu computador,
+# com Docker). O projeto de verdade fica no site do Supabase e não é afetado por
+# este arquivo, exceto pela seção [functions.sorteio] na hora do deploy.
+#
+# Referência completa: https://supabase.com/docs/guides/local-development/cli/config
+
+project_id = "amigo-secreto"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+# O Supabase de verdade ainda libera tabelas novas para a API por padrão, mas isso pode mudar.
+# Aqui o teste local já exige os GRANTs explícitos, que a migração faz: funciona nos dois casos.
+auto_expose_new_tables = false
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[db.seed]
+enabled = false
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = []
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+# Igual à produção: ninguém se cadastra sozinho. Os organizadores são criados à mão.
+enable_signup = false
+enable_anonymous_sign_ins = false
+minimum_password_length = 8
+
+[auth.email]
+enabled = true
+enable_confirmations = false
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+deno_version = 2
+
+[functions.sorteio]
+# false de propósito: a checagem de login do gateway do Supabase só entende as chaves JWT antigas e,
+# em projetos novos, pode recusar o login do organizador ("Invalid JWT") antes de a função rodar.
+# A função confere o login sozinha (index.ts: auth.getUser) e devolve 401 a quem não estiver logado.
+verify_jwt = false
+
+# Serviços que este projeto não usa: desligados para o ambiente local ficar leve.
+[realtime]
+enabled = false
+
+[studio]
+enabled = false
+
+[storage]
+enabled = false
+
+[analytics]
+enabled = false
+
+[local_smtp]
+enabled = false

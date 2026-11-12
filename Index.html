@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --fundo: #f6efe3; --cartao: #fffdf8; --borda: #e6d9c3; --texto: #3b2a1a;
+    --suave: #8a7558; --vermelho: #a3322a; --vermelho-escuro: #7f241e;
+    --verde: #2f6b45; --verde-claro: #e3f0e6; --erro: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--fundo); color: var(--texto);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex; justify-content: center; padding: 32px 16px 48px;
+  }
+  main { width: 100%; max-width: 520px; }
+  header { text-align: center; margin-bottom: 24px; }
+  .laco { font-size: 44px; line-height: 1; }
+  h1 { font-family: Georgia, "Times New Roman", serif; font-size: 30px; margin: 8px 0 4px; }
+  .sub { color: var(--suave); margin: 0; }
+  .cartao {
+    background: var(--cartao); border: 1px solid var(--borda); border-radius: 16px;
+    padding: 22px; box-shadow: 0 2px 10px rgba(80, 50, 20, .06); margin-bottom: 16px;
+  }
+  h2 { font-size: 18px; margin: 0 0 14px; }
+  .nomes { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  button {
+    font: inherit; cursor: pointer; border-radius: 12px; border: 1px solid var(--borda);
+    background: #fff; color: var(--texto); padding: 12px 14px; transition: .15s;
+  }
+  button:hover:not(:disabled) { border-color: var(--vermelho); color: var(--vermelho); }
+  button:disabled { cursor: default; opacity: .6; }
+  .nome.pronto { background: var(--verde-claro); border-color: #bcd8c3; color: var(--verde); opacity: 1; }
+  .nome.pronto::after { content: " ✓"; }
+  .principal { background: var(--vermelho); color: #fff; border-color: var(--vermelho); width: 100%; font-weight: 600; }
+  .principal:hover:not(:disabled) { background: var(--vermelho-escuro); color: #fff; }
+  .link { background: none; border: none; padding: 6px 0; color: var(--suave); text-decoration: underline; }
+  label { display: block; font-size: 14px; color: var(--suave); margin: 12px 0 4px; }
+  input, textarea {
+    width: 100%; font: inherit; padding: 11px 12px; border-radius: 10px;
+    border: 1px solid var(--borda); background: #fff; color: var(--texto);
+  }
+  textarea { min-height: 180px; resize: vertical; }
+  input:focus, textarea:focus { outline: 2px solid var(--vermelho); outline-offset: 1px; }
+  .msg { margin: 12px 0 0; font-size: 14px; min-height: 1.5em; }
+  .msg.erro { color: var(--erro); }
+  .msg.ok { color: var(--verde); }
+  .grande { font-size: 22px; font-family: Georgia, serif; margin: 0 0 8px; }
+  .progresso { color: var(--suave); font-size: 14px; margin: 14px 0 0; text-align: center; }
+  .recado { background: #fff; border-radius: 10px; padding: 10px 12px; font-size: 14px; border: 1px dashed var(--borda); margin-top: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  td { padding: 8px 4px; border-bottom: 1px solid var(--borda); vertical-align: middle; }
+  td.email { color: var(--suave); word-break: break-all; }
+  td.acao { text-align: right; white-space: nowrap; }
+  td.acao button { padding: 4px 10px; font-size: 13px; }
+  .linha { display: flex; gap: 10px; margin-top: 14px; }
+  .linha > * { flex: 1; }
+  .escondido { display: none !important; }
+  .carregando { text-align: center; color: var(--suave); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="laco">🎁</div>
+    <h1>Amigo Secreto da Família</h1>
+    <p class="sub" id="subtitulo">Clique no seu nome para participar</p>
+  </header>
+
+  <!-- ================= participantes ================= -->
+  <section id="telaNomes" class="cartao escondido">
+    <h2>Quem é você?</h2>
+    <div class="nomes" id="listaNomes"></div>
+    <p class="progresso" id="progresso"></p>
+    <div class="recado escondido" id="recadoPublico"></div>
+  </section>
+
+  <section id="telaEmail" class="cartao escondido">
+    <p class="grande">Olá, <span id="nomeEscolhido"></span>!</p>
+    <p class="sub" style="margin:0">Informe seu e-mail. Quando todos tiverem se cadastrado, o sorteio acontece
+      sozinho e você recebe lá o nome de quem tirou.</p>
+    <form id="formEmail">
+      <label for="email">Seu e-mail</label>
+      <input id="email" type="email" autocomplete="email" required>
+      <label for="email2">Repita o e-mail</label>
+      <input id="email2" type="email" autocomplete="off" required>
+      <div class="linha">
+        <button type="submit" class="principal" id="botaoCadastrar">Confirmar</button>
+      </div>
+      <p class="msg" id="msgEmail"></p>
+    </form>
+    <button class="link" id="voltar">Não sou eu, voltar</button>
+  </section>
+
+  <section id="telaPronto" class="cartao escondido">
+    <p class="grande" id="prontoTitulo">Tudo certo! ✓</p>
+    <p id="prontoTexto" style="margin:0"></p>
+    <button class="link" id="voltar2">Voltar para a lista</button>
+  </section>
+
+  <section id="telaSorteado" class="cartao escondido">
+    <p class="grande">O sorteio já foi feito! 🎉</p>
+    <p style="margin:0">Cada participante recebeu por e-mail o nome de quem tirou.
+      Se não encontrar, procure na pasta de spam ou promoções.</p>
+  </section>
+
+  <!-- ================= organizador ================= -->
+  <section id="telaSenha" class="cartao escondido">
+    <h2>Área do organizador</h2>
+    <form id="formSenha">
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" required>
+      <div class="linha"><button type="submit" class="principal">Entrar</button></div>
+      <p class="msg" id="msgSenha"></p>
+    </form>
+  </section>
+
+  <section id="telaAdmin" class="escondido">
+    <div class="cartao" id="cartaoNomes">
+      <h2>Participantes</h2>
+      <label for="textoNomes">Um nome por linha (do jeito que cada um vai reconhecer)</label>
+      <textarea id="textoNomes" placeholder="Vó Maria&#10;Tio João&#10;Ana"></textarea>
+      <label for="recado">Recado no e-mail (opcional)</label>
+      <input id="recado" placeholder="Ex.: valor até R$ 100, troca no dia 24/12">
+      <div class="linha"><button class="principal" id="salvarNomes">Salvar lista</button></div>
+      <p class="msg" id="msgNomes"></p>
+    </div>
+
+    <div class="cartao">
+      <h2>Cadastros</h2>
+      <p class="sub" id="resumoAdmin" style="margin:0 0 10px"></p>
+      <table><tbody id="tabelaAdmin"></tbody></table>
+      <div class="linha" id="linhaSortear">
+        <button class="principal" id="sortear">Sortear e enviar agora</button>
+      </div>
+      <p class="msg" id="msgAdmin"></p>
+    </div>
+
+    <div class="cartao">
+      <h2>Link para a família</h2>
+      <input id="linkPublico" readonly>
+      <p class="sub" style="font-size:14px;margin:8px 0 0">Mande este link no grupo da família. O sorteio sai sozinho
+        quando o último se cadastrar.</p>
+      <div class="linha"><button id="recomecar">Recomeçar do zero</button></div>
+    </div>
+  </section>
+
+  <p class="carregando" id="carregando">Carregando…</p>
+</main>
+
+<script>
+  const MODO_ADMIN = <?= modoAdmin ?> === true;
+  const $ = id => document.getElementById(id);
+  const telas = ['telaNomes', 'telaEmail', 'telaPronto', 'telaSorteado', 'telaSenha', 'telaAdmin', 'carregando'];
+
+  function mostrar(id) {
+    telas.forEach(t => $(t).classList.toggle('escondido', t !== id));
+  }
+
+  // Chama uma função do servidor e devolve uma Promise.
+  function servidor(nome, ...args) {
+    return new Promise((ok, falha) => {
+      google.script.run.withSuccessHandler(ok).withFailureHandler(falha)[nome](...args);
+    });
+  }
+
+  function textoErro(e) {
+    return String((e && e.message) || e).replace(/^Error:\s*/, '').replace(/^Exception:\s*/, '');
+  }
+
+  function mensagem(id, texto, tipo) {
+    $(id).textContent = texto || '';
+    $(id).className = 'msg' + (tipo ? ' ' + tipo : '');
+  }
+
+  // ================= participantes =================
+  let escolhido = null;
+
+  function desenharPublico(est) {
+    if (est.sorteado) {
+      $('subtitulo').textContent = 'Boas festas!';
+      mostrar('telaSorteado');
+      return;
+    }
+    const lista = $('listaNomes');
+    lista.innerHTML = '';
+    if (!est.pessoas.length) {
+      lista.innerHTML = '<p class="sub">O organizador ainda não cadastrou os nomes.</p>';
+    }
+    est.pessoas.forEach(p => {
+      const b = document.createElement('button');
+      b.className = 'nome' + (p.pronto ? ' pronto' : '');
+      b.textContent = p.nome;
+      b.disabled = p.pronto;
+      b.title = p.pronto ? 'Já cadastrado' : 'Sou eu';
+      b.onclick = () => escolher(p.nome);
+      lista.appendChild(b);
+    });
+    const prontos = est.pessoas.filter(p => p.pronto).length;
+    $('progresso').textContent = est.pessoas.length
+      ? prontos + ' de ' + est.pessoas.length + ' já se cadastraram' : '';
+    $('recadoPublico').textContent = est.recado;
+    $('recadoPublico').classList.toggle('escondido', !est.recado);
+    mostrar('telaNomes');
+  }
+
+  function escolher(nome) {
+    escolhido = nome;
+    $('nomeEscolhido').textContent = nome;
+    $('email').value = '';
+    $('email2').value = '';
+    mensagem('msgEmail', '');
+    mostrar('telaEmail');
+    $('email').focus();
+  }
+
+  async function carregarPublico() {
+    mostrar('carregando');
+    try {
+      desenharPublico(await servidor('estadoPublico'));
+    } catch (e) {
+      $('carregando').textContent = 'Não consegui carregar: ' + textoErro(e);
+    }
+  }
+
+  $('formEmail').onsubmit = async ev => {
+    ev.preventDefault();
+    const e1 = $('email').value.trim(), e2 = $('email2').value.trim();
+    if (e1.toLowerCase() !== e2.toLowerCase()) {
+      mensagem('msgEmail', 'Os dois e-mails não são iguais.', 'erro');
+      return;
+    }
+    $('botaoCadastrar').disabled = true;
+    mensagem('msgEmail', 'Enviando…');
+    try {
+      const r = await servidor('cadastrarEmail', escolhido, e1);
+      $('prontoTexto').textContent = r.sorteioFeito
+        ? 'Você foi o último a se cadastrar, então o sorteio acabou de acontecer! Confira seu e-mail (e a pasta de spam).'
+        : 'Seu e-mail foi cadastrado. Quando todos se cadastrarem, você recebe o nome do seu amigo secreto em ' + e1 + '.';
+      mostrar('telaPronto');
+    } catch (e) {
+      mensagem('msgEmail', textoErro(e), 'erro');
+    } finally {
+      $('botaoCadastrar').disabled = false;
+    }
+  };
+  $('voltar').onclick = carregarPublico;
+  $('voltar2').onclick = carregarPublico;
+
+  // ================= organizador =================
+  let senha = '';
+
+  function desenharAdmin(est) {
+    const sorteado = !!est.sorteadoEm;
+    $('textoNomes').value = est.pessoas.map(p => p.nome).join('\n');
+    $('recado').value = est.recado;
+    ['textoNomes', 'recado', 'salvarNomes'].forEach(id => { $(id).disabled = sorteado; });
+
+    const tabela = $('tabelaAdmin');
+    tabela.innerHTML = '';
+    est.pessoas.forEach(p => {
+      const tr = document.createElement('tr');
+      const tdNome = document.createElement('td'); tdNome.textContent = p.nome;
+      const tdEmail = document.createElement('td'); tdEmail.className = 'email';
+      tdEmail.textContent = p.email || '— aguardando —';
+      const tdAcao = document.createElement('td'); tdAcao.className = 'acao';
+      if (p.email && !sorteado) {
+        const b = document.createElement('button');
+        b.textContent = 'Apagar e-mail';
+        b.onclick = () => acaoAdmin('adminLimparEmail', 'msgAdmin',
+          'E-mail de ' + p.nome + ' apagado.', p.nome);
+        tdAcao.appendChild(b);
+      }
+      tr.append(tdNome, tdEmail, tdAcao);
+      tabela.appendChild(tr);
+    });
+
+    const prontos = est.pessoas.filter(p => p.email).length;
+    $('resumoAdmin').textContent = sorteado
+      ? 'Sorteio feito em ' + new Date(est.sorteadoEm).toLocaleString('pt-BR') + '. Os pares não foram guardados.'
+      : prontos + ' de ' + est.pessoas.length + ' cadastrados.';
+    $('linhaSortear').classList.toggle('escondido', sorteado);
+    $('sortear').disabled = !est.pessoas.length || prontos < est.pessoas.length;
+    mostrar('telaAdmin');
+  }
+
+  async function acaoAdmin(funcao, idMsg, textoOk, ...args) {
+    mensagem(idMsg, 'Aguarde…');
+    try {
+      desenharAdmin(await servidor(funcao, senha, ...args));
+      mensagem(idMsg, textoOk, 'ok');
+    } catch (e) {
+      mensagem(idMsg, textoErro(e), 'erro');
+    }
+  }
+
+  $('formSenha').onsubmit = async ev => {
+    ev.preventDefault();
+    senha = $('senha').value;
+    mensagem('msgSenha', 'Conferindo…');
+    try {
+      desenharAdmin(await servidor('adminEstado', senha));
+      $('subtitulo').textContent = 'Área do organizador';
+    } catch (e) {
+      mensagem('msgSenha', textoErro(e), 'erro');
+    }
+  };
+
+  $('salvarNomes').onclick = () => acaoAdmin('adminSalvarNomes', 'msgNomes', 'Lista salva.',
+    $('textoNomes').value, $('recado').value);
+
+  $('sortear').onclick = () => {
+    if (!confirm('Sortear agora e mandar os e-mails para todos?')) return;
+    acaoAdmin('adminSortear', 'msgAdmin', 'Sorteio feito e e-mails enviados!');
+  };
+
+  $('recomecar').onclick = () => {
+    if (!confirm('Apagar a lista, os e-mails e o sorteio para começar de novo?')) return;
+    acaoAdmin('adminRecomecar', 'msgAdmin', 'Tudo apagado.');
+  };
+
+  // ================= início =================
+  if (MODO_ADMIN) {
+    $('linkPublico').value = <?= urlPublico ?>;
+    $('linkPublico').onclick = () => $('linkPublico').select();
+    $('subtitulo').textContent = 'Área do organizador';
+    mostrar('telaSenha');
+    $('senha').focus();
+  } else {
+    carregarPublico();
+  }
+</script>
+</body>
+</html>

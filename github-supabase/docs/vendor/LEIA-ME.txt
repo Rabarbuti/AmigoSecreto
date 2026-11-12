@@ -1,0 +1,9 @@
+supabase.js  -  biblioteca @supabase/supabase-js, versão 2.119.0 (licença MIT, veja supabase.LICENSE).
+
+É o arquivo dist/umd/supabase.js do pacote oficial, copiado sem alterações para o site não depender
+de nenhum CDN (menos uma peça de terceiros carregando na página de quem organiza).
+
+Para atualizar:
+  npm pack @supabase/supabase-js@<versao>
+  extraia package/dist/umd/supabase.js e package/LICENSE e substitua os arquivos desta pasta.
+SHA-256 deste arquivo (2.119.0): A867EDBCFB029370AEEC7223DD6180B560B621FBE3BC64C6584FB0369D1B7BCE

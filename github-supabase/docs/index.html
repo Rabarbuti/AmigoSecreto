@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+    Política de segurança: só roda script do próprio site e só fala com o Supabase.
+    (127.0.0.1 e localhost são para testar no seu computador.)
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://*.supabase.co http://127.0.0.1:54321 http://localhost:54321; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#a3322a">
+  <title>Amigo Secreto</title>
+  <meta name="description" content="Organize o seu amigo secreto: cadastre os participantes, mande um link, sorteie e cada um recebe por e-mail quem tirou.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Amigo Secreto">
+  <meta property="og:description" content="Escolha o seu nome e deixe o seu e-mail para o sorteio do amigo secreto.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%81%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <div id="faixa-demo" class="faixa-demo" role="note" hidden>
+    <strong>Modo demonstração:</strong> os dados são de mentirinha, nada é salvo e nenhum e-mail é enviado.
+    Para usar de verdade, preencha o <code>config.js</code> com os dados do seu Supabase.
+  </div>
+
+  <header class="topo">
+    <a class="marca" href="#/"><span aria-hidden="true">🎁</span> Amigo Secreto</a>
+    <nav id="menu" class="menu" aria-label="Menu do organizador"></nav>
+  </header>
+
+  <main id="app" tabindex="-1">
+    <p class="carregando" role="status">Carregando…</p>
+  </main>
+
+  <div id="avisos" class="avisos" aria-live="polite"></div>
+
+  <noscript><p class="carregando">Este site precisa de JavaScript para funcionar.</p></noscript>
+
+  <script src="config.js"></script>
+  <script src="vendor/supabase.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

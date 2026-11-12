@@ -1,0 +1,23 @@
+{
+  "name": "amigo-secreto",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Site de amigo secreto: GitHub Pages (site) + Supabase (banco, login e função de sorteio) + e-mail pelo Gmail",
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "test:banco": "node scripts/testar-banco.mjs",
+    "test:e2e": "node scripts/e2e-local.mjs",
+    "ponte-falsa": "node scripts/ponte-falsa.mjs",
+    "usuario:local": "node scripts/criar-usuario-local.mjs",
+    "site": "python -m http.server 5500 --directory docs",
+    "supabase": "supabase",
+    "banco:iniciar": "supabase start",
+    "banco:parar": "supabase stop --no-backup",
+    "banco:zerar": "supabase db reset",
+    "funcao:servir": "supabase functions serve sorteio --env-file supabase/functions/.env"
+  },
+  "devDependencies": {
+    "supabase": "^3.1.0"
+  }
+}
